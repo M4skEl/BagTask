@@ -35,12 +35,24 @@ def find_items(total_matrix, i, j):
         obj_list.append(i)
 
 
+def print_answer(total_matrix, obj_list, weight_list, out):
+    sum_mass = 0
+    for i in range(len(obj_list)):
+        sum_mass += weight_list[obj_list[i]]
+    str_ans = str(sum_mass) + ' ' + str(total_matrix[-1][-1])
+    print(str_ans, file=out)
+    for elem in obj_list:
+        print(elem, file=out)
+
+
 def main():
     table = do_table(mass, weights, costs)
     find_items(table, len(table) - 1, len(table[0]) - 1)
     print(table)
     print(table[-1][-1])
     print(obj_list)
+
+    print_answer(table, obj_list, weights, sys.stdout)
 
 
 main()
