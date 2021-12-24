@@ -1,8 +1,8 @@
 import sys
 
-mass = 165
-weights = [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]  # веса прдметов
-costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]  # стоимость предметов
+mass = 13
+weights = [3, 4, 5, 8, 9]  # веса прдметов
+costs = [1, 6, 4, 7, 6]  # стоимость предметов
 obj_list = list()  # индексы взятых предметов
 
 
@@ -24,15 +24,23 @@ def do_table(max_mass, weight_list, cost_list):
 
     return total_matrix
 
-def find_items(total_matrix):
-    pass
+
+def find_items(total_matrix, i, j):
+    if total_matrix[i][j] == 0:
+        return
+    if total_matrix[i - 1][j] == total_matrix[i][j]:
+        find_items(total_matrix, i - 1, j)
+    else:
+        find_items(total_matrix, i - 1, j - weights[i - 1])
+        obj_list.append(i)
+
 
 def main():
-
     table = do_table(mass, weights, costs)
-
+    find_items(table, len(table) - 1, len(table[0]) - 1)
     print(table)
     print(table[-1][-1])
+    print(obj_list)
 
 
 main()
