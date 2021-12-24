@@ -1,10 +1,5 @@
 import sys
 
-mass = 165
-weights = [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]  # веса прдметов
-costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]  # стоимость предметов
-obj_list = list()  # индексы взятых предметов
-
 
 def do_table(max_mass, weight_list, cost_list):
     total_matrix = [[0 for _ in range(max_mass + 1)] for __ in range(len(weight_list) + 1)]
@@ -40,7 +35,7 @@ def print_answer(total_matrix, obj_list, weight_list, out):
     for iter in obj_list:
         if iter == 0:
             continue
-        sum_mass += weight_list[iter-1]
+        sum_mass += weight_list[iter - 1]
     str_ans = str(sum_mass) + ' ' + str(total_matrix[-1][-1])
     print(str_ans, file=out)
     for elem in obj_list:
@@ -48,11 +43,28 @@ def print_answer(total_matrix, obj_list, weight_list, out):
 
 
 def main():
+    mass = 165
+    weights = [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]  # веса прдметов
+    costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]  # стоимость предметов
+    obj_list = list()  # индексы взятых предметов
+
+    for line in sys.stdin:
+        line = line.rstrip('\r\n')
+
+        if len(line.split()) == 1:
+            mass = int(line.split()[0])
+
+        if len(line.split()) == 2 and mass:
+            weights.append(int(line.split()[0]))
+            costs.append(int(line.split()[1]))
+        elif not (line and line.strip()):
+            continue
+        else:
+            print("error", file=sys.stdout)
+
     table = do_table(mass, weights, costs)
+
     find_items(table, len(table) - 1, len(table[0]) - 1)
-    print(table)
-    print(table[-1][-1])
-    print(obj_list)
 
     print_answer(table, obj_list, weights, sys.stdout)
 
