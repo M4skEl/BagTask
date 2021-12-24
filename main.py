@@ -1,8 +1,8 @@
 import sys
 
-mass = 13
-weights = [3, 4, 5, 8, 9]  # веса прдметов
-costs = [1, 6, 4, 7, 6]  # стоимость предметов
+mass = 165
+weights = [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]  # веса прдметов
+costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]  # стоимость предметов
 obj_list = list()  # индексы взятых предметов
 
 
@@ -37,8 +37,10 @@ def find_items(total_matrix, i, j):
 
 def print_answer(total_matrix, obj_list, weight_list, out):
     sum_mass = 0
-    for i in range(len(obj_list)):
-        sum_mass += weight_list[obj_list[i]]
+    for iter in obj_list:
+        if iter == 0:
+            continue
+        sum_mass += weight_list[iter-1]
     str_ans = str(sum_mass) + ' ' + str(total_matrix[-1][-1])
     print(str_ans, file=out)
     for elem in obj_list:
