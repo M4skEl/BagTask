@@ -26,6 +26,10 @@ def do_table(max_mass, weight_list, cost_list, nod):
 
             if i == 0 or j == 0:
                 total_matrix[i][j] = 0
+                if j == 0:
+                    if weight_list[i - 1] == 0:
+                        total_matrix[i][j] = cost_list[i - 1]
+
                 continue
             if weight_list[i - 1] > j:
                 total_matrix[i][j] = total_matrix[i - 1][j]
@@ -59,36 +63,59 @@ def print_answer(total_matrix, obj_list, weight_list, nod, out):
         print(elem, file=out)
 
 
+def print_zero_answer(price, obj_list, weight_list, out):
+    sum_mass = 0
+    for iter in obj_list:
+        if iter == 0:
+            continue
+        sum_mass += weight_list[iter - 1]
+    str_ans = str(sum_mass) + ' ' + str(price)
+    print(str_ans, file=out)
+    for elem in obj_list:
+        print(elem, file=out)
+
+
 def main():
-    mass = 0
+    mass = None
 
     for line in sys.stdin:
         line = line.rstrip('\r\n')
 
-        if len(line.split()) == 1 and not mass:
+        if len(line.split()) == 1 and mass is None:
             mass = int(line.split()[0])
             continue
 
-        elif len(line.split()) == 2 and mass:
-            weights.append(int(line.split()[0]))
-            costs.append(int(line.split()[1]))
-            continue
+        elif len(line.split()) == 2 and mass is not None:
+            if line.split()[0].isdigit() and line.split()[1].isdigit():
+                weights.append(int(line.split()[0]))
+                costs.append(int(line.split()[1]))
+            else:
+                print("error", file=sys.stdout)
 
-        elif line == "end":
-            break
+        # elif line == "end":
+        #     break
 
         elif not (line and line.strip()):
             continue
         else:
             print("error", file=sys.stdout)
 
-    nod = update_weight(mass, weights)
+    if mass:
+        nod = update_weight(mass, weights)
 
-    table = do_table(mass, weights, costs, nod)
+        table = do_table(mass, weights, costs, nod)
 
-    find_items(table, len(table) - 1, len(table[0]) - 1)
+        find_items(table, len(table) - 1, len(table[0]) - 1)
 
-    print_answer(table, obj_list, weights, nod, sys.stdout)
+        print_answer(table, obj_list, weights, nod, sys.stdout)
+
+    elif weights:
+        price = 0
+        for i in range(len(weights)):
+            if weights[i] == 0:
+                obj_list.append(i + 1)
+                price += costs[i]
+        print_zero_answer(price, obj_list, weights, sys.stdout)
 
 
 main()
