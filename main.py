@@ -1,11 +1,24 @@
+import math
 import sys
-
 
 weights = []  # веса прдметов
 costs = []  # стоимость предметов
 obj_list = []  # индексы взятых предметов
 
-def do_table(max_mass, weight_list, cost_list):
+
+def update_weight(mass, weight):
+    nod = math.gcd(mass, weight[0])
+    for elem in weight:
+        nod = math.gcd(nod, elem)
+
+    return int(nod)
+
+
+def do_table(max_mass, weight_list, cost_list, nod):
+    max_mass = int(max_mass / nod)
+    for i in range(len(weight_list)):
+        weight_list[i] = int(weight_list[i] / nod)
+
     total_matrix = [[0 for _ in range(max_mass + 1)] for __ in range(len(weight_list) + 1)]
 
     for i in range(len(weight_list) + 1):
@@ -34,13 +47,13 @@ def find_items(total_matrix, i, j):
         obj_list.append(i)
 
 
-def print_answer(total_matrix, obj_list, weight_list, out):
+def print_answer(total_matrix, obj_list, weight_list, nod, out):
     sum_mass = 0
     for iter in obj_list:
         if iter == 0:
             continue
         sum_mass += weight_list[iter - 1]
-    str_ans = str(sum_mass) + ' ' + str(total_matrix[-1][-1])
+    str_ans = str(sum_mass * nod) + ' ' + str(total_matrix[-1][-1])
     print(str_ans, file=out)
     for elem in obj_list:
         print(elem, file=out)
@@ -48,7 +61,6 @@ def print_answer(total_matrix, obj_list, weight_list, out):
 
 def main():
     mass = 0
-
 
     for line in sys.stdin:
         line = line.rstrip('\r\n')
@@ -70,11 +82,13 @@ def main():
         else:
             print("error", file=sys.stdout)
 
-    table = do_table(mass, weights, costs)
+    nod = update_weight(mass, weights)
+
+    table = do_table(mass, weights, costs, nod)
 
     find_items(table, len(table) - 1, len(table[0]) - 1)
 
-    print_answer(table, obj_list, weights, sys.stdout)
+    print_answer(table, obj_list, weights, nod, sys.stdout)
 
 
 main()
