@@ -1,6 +1,10 @@
 import sys
 
 
+weights = []  # веса прдметов
+costs = []  # стоимость предметов
+obj_list = []  # индексы взятых предметов
+
 def do_table(max_mass, weight_list, cost_list):
     total_matrix = [[0 for _ in range(max_mass + 1)] for __ in range(len(weight_list) + 1)]
 
@@ -43,20 +47,24 @@ def print_answer(total_matrix, obj_list, weight_list, out):
 
 
 def main():
-    mass = 165
-    weights = [23, 31, 29, 44, 53, 38, 63, 85, 89, 82]  # веса прдметов
-    costs = [92, 57, 49, 68, 60, 43, 67, 84, 87, 72]  # стоимость предметов
-    obj_list = list()  # индексы взятых предметов
+    mass = 0
+
 
     for line in sys.stdin:
         line = line.rstrip('\r\n')
 
-        if len(line.split()) == 1:
+        if len(line.split()) == 1 and not mass:
             mass = int(line.split()[0])
+            continue
 
-        if len(line.split()) == 2 and mass:
+        elif len(line.split()) == 2 and mass:
             weights.append(int(line.split()[0]))
             costs.append(int(line.split()[1]))
+            continue
+
+        elif line == "end":
+            break
+
         elif not (line and line.strip()):
             continue
         else:
