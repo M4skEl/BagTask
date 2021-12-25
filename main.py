@@ -1,121 +1,115 @@
 import math
 import sys
 
-weights = []  # веса прдметов
-costs = []  # стоимость предметов
-obj_list = []  # индексы взятых предметов
 
+class BackpackTask:
 
-def update_weight(mass, weight):
-    nod = math.gcd(mass, weight[0])
-    for elem in weight:
-        nod = math.gcd(nod, elem)
+    def __init__(self, mass=None, weights=[], costs=[], obj=[]):
+        self.mass = mass
+        self.weights = weights  # веса прдметов
+        self.costs = costs  # стоимость предметов
+        self.obj_list = obj  # индексы взятых предметов
+        self.total_matrix = None
+        self.price = 0
+        self.nod = 0
 
-    return int(nod)
+    def calc_nod(self):
+        self.nod = math.gcd(self.mass, self.weights[0])
+        for elem in self.weights:
+            self.nod = math.gcd(self.nod, elem)
+        return int(self.nod)
 
+    def do_table(self):
+        if not self.mass:
+            for i in range(len(self.weights)):
+                if self.weights[i] == 0:
+                    self.obj_list.append(i + 1)
+                    self.price += self.costs[i]
+            return
 
-def do_table(max_mass, weight_list, cost_list, nod):
-    max_mass = int(max_mass / nod)
-    for i in range(len(weight_list)):
-        weight_list[i] = int(weight_list[i] / nod)
+        self.nod = self.calc_nod()
+        self.mass = int(self.mass / self.nod)
+        for i in range(len(self.weights)):
+            self.weights[i] = int(self.weights[i] / self.nod)
 
-    total_matrix = [[0 for _ in range(max_mass + 1)] for __ in range(len(weight_list) + 1)]
+        self.total_matrix = [[0 for _ in range(self.mass + 1)] for __ in range(len(self.weights) + 1)]
 
-    for i in range(len(weight_list) + 1):
-        for j in range(max_mass + 1):
+        for i in range(len(self.weights) + 1):
+            for j in range(self.mass + 1):
 
-            if i == 0 or j == 0:
-                total_matrix[i][j] = 0
-                if j == 0:
-                    if weight_list[i - 1] == 0:
-                        total_matrix[i][j] = cost_list[i - 1]
+                if i == 0 or j == 0:
+                    self.total_matrix[i][j] = 0
+                    if j == 0:
+                        if self.weights[i - 1] == 0:
+                            self.total_matrix[i][j] = self.costs[i - 1]
+                    continue
+                if self.weights[i - 1] > j:
+                    self.total_matrix[i][j] = self.total_matrix[i - 1][j]
+                    continue
+                prev_res = self.total_matrix[i - 1][j]
+                new_res = self.costs[i - 1] + self.total_matrix[i - 1][j - self.weights[i - 1]]
+                self.total_matrix[i][j] = max(prev_res, new_res)
 
+        return self.total_matrix
+
+    def find_items(self, i, j):
+        if self.total_matrix[i][j] == 0:
+            return
+        if self.total_matrix[i - 1][j] == self.total_matrix[i][j]:
+            self.find_items(i - 1, j)
+        else:
+            self.find_items(i - 1, j - self.weights[i - 1])
+            self.obj_list.append(i)
+
+    def total_calculate(self):
+        self.total_matrix = self.do_table()
+        if self.mass:
+            self.find_items(len(self.total_matrix) - 1, len(self.total_matrix[0]) - 1)
+
+    def print_answer(self, out):
+        sum_mass = 0
+        for iter in self.obj_list:
+            if iter == 0:
                 continue
-            if weight_list[i - 1] > j:
-                total_matrix[i][j] = total_matrix[i - 1][j]
-                continue
-            prev_res = total_matrix[i - 1][j]
-            new_res = cost_list[i - 1] + total_matrix[i - 1][j - weight_list[i - 1]]
-            total_matrix[i][j] = max(prev_res, new_res)
+            sum_mass += self.weights[iter - 1]
 
-    return total_matrix
+        if not self.mass:
+            str_ans = str(sum_mass) + ' ' + str(self.price)
+        else:
+            str_ans = str(sum_mass * self.nod) + ' ' + str(self.total_matrix[-1][-1])
 
-
-def find_items(total_matrix, i, j):
-    if total_matrix[i][j] == 0:
-        return
-    if total_matrix[i - 1][j] == total_matrix[i][j]:
-        find_items(total_matrix, i - 1, j)
-    else:
-        find_items(total_matrix, i - 1, j - weights[i - 1])
-        obj_list.append(i)
-
-
-def print_answer(total_matrix, obj_list, weight_list, nod, out):
-    sum_mass = 0
-    for iter in obj_list:
-        if iter == 0:
-            continue
-        sum_mass += weight_list[iter - 1]
-    str_ans = str(sum_mass * nod) + ' ' + str(total_matrix[-1][-1])
-    print(str_ans, file=out)
-    for elem in obj_list:
-        print(elem, file=out)
-
-
-def print_zero_answer(price, obj_list, weight_list, out):
-    sum_mass = 0
-    for iter in obj_list:
-        if iter == 0:
-            continue
-        sum_mass += weight_list[iter - 1]
-    str_ans = str(sum_mass) + ' ' + str(price)
-    print(str_ans, file=out)
-    for elem in obj_list:
-        print(elem, file=out)
+        print(str_ans, file=out)
+        for elem in self.obj_list:
+            print(elem, file=out)
 
 
 def main():
-    mass = None
+    table = BackpackTask()
 
     for line in sys.stdin:
         line = line.rstrip('\r\n')
 
-        if len(line.split()) == 1 and mass is None:
-            mass = int(line.split()[0])
+        if len(line.split()) == 1 and table.mass is None:
+            table.mass = int(line.split()[0])
             continue
 
-        elif len(line.split()) == 2 and mass is not None:
+        elif len(line.split()) == 2 and table.mass is not None:
             if line.split()[0].isdigit() and line.split()[1].isdigit():
-                weights.append(int(line.split()[0]))
-                costs.append(int(line.split()[1]))
+                table.weights.append(int(line.split()[0]))
+                table.costs.append(int(line.split()[1]))
             else:
                 print("error", file=sys.stdout)
 
-        # elif line == "end":
-        #     break
+        elif line == "end":
+            break
 
         elif not (line and line.strip()):
             continue
         else:
             print("error", file=sys.stdout)
 
-    if mass:
-        nod = update_weight(mass, weights)
-
-        table = do_table(mass, weights, costs, nod)
-
-        find_items(table, len(table) - 1, len(table[0]) - 1)
-
-        print_answer(table, obj_list, weights, nod, sys.stdout)
-
-    elif weights:
-        price = 0
-        for i in range(len(weights)):
-            if weights[i] == 0:
-                obj_list.append(i + 1)
-                price += costs[i]
-        print_zero_answer(price, obj_list, weights, sys.stdout)
+    table.total_calculate()
+    table.print_answer(sys.stdout)
 
 
 main()
